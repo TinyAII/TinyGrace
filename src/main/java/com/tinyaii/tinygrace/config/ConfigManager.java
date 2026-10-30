@@ -13,6 +13,10 @@ import java.util.List;
  */
 public final class ConfigManager {
 
+    /** 版本检查服务的默认地址与 app_key（公开标识，不是密钥）。 */
+    private static final String DEFAULT_UPDATE_ENDPOINT = "https://bump.tinyaii.cn";
+    private static final String DEFAULT_APP_KEY = "app_bea0897e0b7064cffd866055";
+
     private final TinyGrace plugin;
 
     private boolean enabled = true;
@@ -24,6 +28,14 @@ public final class ConfigManager {
     private boolean keepInventoryConsumes = false;
     private boolean keepLevel = true;
     private boolean warnExhausted = true;
+    // 在线更新检查
+    private boolean updateCheckEnabled = true;
+    private String updateEndpoint = DEFAULT_UPDATE_ENDPOINT;
+    private String updateAppKey = DEFAULT_APP_KEY;
+    private String updateChannel = "stable";
+    private int updateTimeoutSeconds = 3;
+    private int updateIntervalHours = 6;
+    private String updateNotifyPermission = "tinygrace.admin";
 
     public ConfigManager(TinyGrace plugin) {
         this.plugin = plugin;
@@ -40,6 +52,20 @@ public final class ConfigManager {
         keepInventoryConsumes = c.getBoolean("protection.keep-inventory-consumes", false);
         keepLevel = c.getBoolean("protection.keep-level", true);
         warnExhausted = c.getBoolean("protection.warn-exhausted", true);
+
+        updateCheckEnabled = c.getBoolean("update-check.enabled", true);
+        updateEndpoint = c.getString("update-check.endpoint", DEFAULT_UPDATE_ENDPOINT);
+        updateAppKey = c.getString("update-check.app-key", "");
+        // 老版本升级上来的 config.yml 没有 update-check 段；
+        // Paper 上 setDefaults 兜不住（TinyFish 踩过），所以这里做代码级兜底。
+        // app_key 是公开标识，写死在代码里没有安全风险。
+        if (updateAppKey == null || updateAppKey.trim().isEmpty()) {
+            updateAppKey = DEFAULT_APP_KEY;
+        }
+        updateChannel = c.getString("update-check.channel", "stable");
+        updateTimeoutSeconds = Math.max(1, c.getInt("update-check.timeout-seconds", 3));
+        updateIntervalHours = Math.max(1, c.getInt("update-check.interval-hours", 6));
+        updateNotifyPermission = c.getString("update-check.notify-permission", "tinygrace.admin");
 
         List<Integer> warn = new ArrayList<Integer>();
         for (Object raw : c.getList("protection.warn-at", Collections.singletonList(0))) {
@@ -69,6 +95,20 @@ public final class ConfigManager {
 
     /** 配额用完后的死亡是否红色提醒。 */
     public boolean isWarnExhausted() { return warnExhausted; }
+
+    public boolean isUpdateCheckEnabled() { return updateCheckEnabled; }
+
+    public String getUpdateEndpoint() { return updateEndpoint; }
+
+    public String getUpdateAppKey() { return updateAppKey; }
+
+    public String getUpdateChannel() { return updateChannel; }
+
+    public int getUpdateTimeoutSeconds() { return updateTimeoutSeconds; }
+
+    public int getUpdateIntervalHours() { return updateIntervalHours; }
+
+    public String getUpdateNotifyPermission() { return updateNotifyPermission; }
 
     /** 取消息模板（未上色，交给 Texts.format 处理）。 */
     public String message(String key) {

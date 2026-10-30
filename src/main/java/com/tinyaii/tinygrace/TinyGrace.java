@@ -4,6 +4,8 @@ import com.tinyaii.tinygrace.command.GraceCommand;
 import com.tinyaii.tinygrace.config.ConfigManager;
 import com.tinyaii.tinygrace.data.GraceData;
 import com.tinyaii.tinygrace.listener.PlayerDeathListener;
+import com.tinyaii.tinygrace.listener.UpdateNotifyListener;
+import com.tinyaii.tinygrace.service.UpdateChecker;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,6 +29,7 @@ public final class TinyGrace extends JavaPlugin {
 
     private ConfigManager configManager;
     private GraceData graceData;
+    private UpdateChecker updateChecker;
 
     @Override
     public void onEnable() {
@@ -39,6 +42,11 @@ public final class TinyGrace extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(
                 new PlayerDeathListener(configManager, graceData), this);
+
+        updateChecker = new UpdateChecker(this, configManager);
+        updateChecker.start();
+        getServer().getPluginManager().registerEvents(
+                new UpdateNotifyListener(this, updateChecker), this);
 
         PluginCommand command = getCommand("tinygrace");
         if (command != null) {
@@ -54,6 +62,9 @@ public final class TinyGrace extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (updateChecker != null) {
+            updateChecker.stop();
+        }
         // 数据存在玩家 PDC 里，由服务端负责落盘，这里不需要清理
     }
 
