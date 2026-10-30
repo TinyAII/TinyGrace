@@ -1,0 +1,27 @@
+name: TinyGrace
+main: com.tinyaii.tinygrace.TinyGrace
+version: 1.0.0
+
+# 1.14 是本插件的最低 API 世代（PersistentDataContainer 从 1.14 才有）。
+# api-version 是「下限」语义，所以声明 1.14 在 1.14 ~ 26.x 上都会被接受。
+api-version: "1.14"
+
+author: TinyAII
+description: 有限死亡保护 - 前 N 次死亡保留背包与经验（单 jar 支持 1.14~26.x，零依赖）
+
+commands:
+  tinygrace:
+    description: TinyGrace 主命令
+    usage: /tinygrace help
+    aliases: [tg, 保护]
+
+permissions:
+  tinygrace.use:
+    description: 查看自己的保护状态、开关自己的死亡保护
+    default: true
+  tinygrace.admin:
+    description: 查看/修改其他玩家、切换全局开关、重载配置
+    default: op
+  tinygrace.unlimited:
+    description: 无限保护（死亡不消耗次数）
+    default: false
