@@ -1,6 +1,6 @@
 name: TinyGrace
 main: com.tinyaii.tinygrace.TinyGrace
-version: 1.0.0
+version: '1.0.1'
 
 # 1.14 是本插件的最低 API 世代（PersistentDataContainer 从 1.14 才有）。
 # api-version 是「下限」语义，所以声明 1.14 在 1.14 ~ 26.x 上都会被接受。
